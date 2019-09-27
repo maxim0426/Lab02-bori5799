@@ -54,4 +54,33 @@ resource "google_compute_instance" "svc-1" {
   provisioner "remote-exec" {
     connection {
       host        = "${google_compute_instance.svc-1.network_interface.0.access_config.0.nat_ip}"
-      user        = "bori579
+      user        = "bori5799"
+      type        = "ssh"
+      private_key = "${file("~/.ssh/google_compute_engine")}"
+      }
+    inline = [ 
+      "chmod +x ~/svc-01/install.sh",
+      "sudo ~/svc-01/install.sh",
+    ]
+  }
+
+  #metadata_startup_script = "echo hello > ~/success.txt"
+  
+  #service account is essential for file provisioner
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+
+}
+
+resource "google_compute_firewall" "default" {
+ name    = "svc01-firewall"
+ network = "default"
+
+ allow {
+   protocol = "tcp"
+   ports    = ["80"]
+ }
+}
+
+  output "ip" {
